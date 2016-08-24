@@ -6,45 +6,53 @@ import "Sim2HDR.dll"
 import "exr_lib.dll"
 import "Quasar.UI.dll"
 
-%Applies the PQ codeword-to-light electro-to-optical transfer function to input data from EXR
-function y = PQ_EOTF(x)
-   %constants
-   m1=2610/4096*1/4
-   m2=2523/4096*128
-   c1=3424/4096
-   c2=2413/4096*32
-   c3=2392/4096*32
-   y = ((x.^(1./m2)-c1)./(c2-c3*x.^(1/m2))).^(1/m1)
+img:cube 
+
+%Fix negative
+function [y:cube] = fix_negative(x:cube,m:scalar)
+    function []= __kernel__ fix_negative_kernel(x:cube'unchecked,y:cube'unchecked,m:scalar,pos:ivec2)
+        {!kernel target="gpu"}
+        if(x[pos[0],pos[1],0]<=0.0)
+            y[pos[0],pos[1],0]=m
+        endif
+        if(x[pos[0],pos[1],1]<=0.0)
+            y[pos[0],pos[1],1]=m
+        endif
+        if(x[pos[0],pos[1],2]<=0.0)
+            y[pos[0],pos[1],2]=m
+        endif   
+        syncthreads 
+    end
+    y=uninit(size(x))
+    parallel_do(size(x,0..1),x,y,m,fix_negative_kernel)
 end
 
-% Alexa to sRGB linear convertion
-function img_rgb = Alexa2sRGB(img_alexa)
-   H = [[1.617523436306807,-0.070572740897816,-0.021101728042793],[-0.537286622188294,1.334613062330328,-0.226953875218266],[-0.080236814118512,-0.264040321432512,1.248055603261060]];
-   img_rgb = reshape(reshape(img_alexa,[1080*1920,3])*H,[1080,1920,3]);
+
+%Event
+function [] = mouse_handler(pos)
+    str=sprintf("R:%f G:%f B%f",img[pos[0],pos[1],0],img[pos[0],pos[1],1],img[pos[0],pos[1],2])
+    print(str) 
 end
 
-%Applies the PQ codeword-to-light electro-to-optical transfer function PHILIPS version to input data from EXR
-function y =PQ_EOTF_PHILIPS(x)
-     y=(x>0).*(((25.^x-1)/(25-1)).^2.4)+(x<=0).*0;
-end
+%10stops
+minEV=-4;
+maxEV=6;    
+    
+i=158
+repeat
+    i=i+1
+    exr_file_path = sprintf("F:/tearsofsteel/01_2a/out/itm_01_2a_000%03d.exr",i); %158
+    %exr_file_path="C:/Users/ipi/Documents/gluzardo/eotf_pq/linear_tears_of_steal.exr"
+    img = exrread(exr_file_path).data;
+    
+    
+    %img=(img<0).*(0.18*2^minEV)+(img>=0).*img;
+    img=fix_negative(img,0.18*2^minEV);
+    
+    fig=hdr_imshow(img,[0.18*2^minEV,0.18*2^maxEV])
+    fig.onSelectPoint.add(mouse_handler)
+until !hold("on")
 
-%Delinearize. Linear to not linear sRGB
-function y = sRGB_delinearize(x)
-    y=((x>0.0031308).*(1.055.*x.^(1/2.4)-0.055)+(x<=0.0031308).*12.92.*x);
-end
 
-%linearize. Not Linear to linear sRGB
-function y = sRGB_linearize(x) 
-    y = (x<0).*0 + (x<=0.04045).*x./12.92 + (((x>0.04045).*x+0.055)/1.055).^2.4;
-end                                      
 
-function [] = main() 
-    i=158
-    repeat
-        i=i+1
-        exr_file_path = sprintf("F:/tearsofsteel/01_2a/out/itm_01_2a_000%03d.exr",i); %158
-        img = exrread(exr_file_path);
-        hdr_imshow(img.data,[0,100])
-    until !hold("on")
-end
 
