@@ -44,7 +44,7 @@ function [] = main()
         i=i+1
         exr_file_path = sprintf("F:/tearsofsteel/01_2a/out/itm_01_2a_000%03d.exr",i); %158
         img = exrread(exr_file_path);
-        imshow(img.data,[0,1])
+        hdr_imshow(img.data,[0,100])
     until !hold("on")
 end
 
