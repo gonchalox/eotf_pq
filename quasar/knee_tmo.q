@@ -83,10 +83,10 @@ function [] = main()
     %Tmo Params   
     tmo_params = object()
     % Derfault params
-    tmo_params.EV=5;
+    tmo_params.EV=6;
     tmo_params.gamma=1.0;
     tmo_params.kneeLow=-3;
-    tmo_params.kneeHigh=maxEV;
+    tmo_params.kneeHigh=EV_b_in;
     tmo_params.maxStopsImgIn=EV_b_in;
     tmo_params.maxStopsImgOut=maxEV;
     tmo_params.midGray=1;
