@@ -47,11 +47,6 @@ function [y:vec3] = __device__ clamp_values(x:vec3'unchecked,l:scalar,h:scalar)
     end
 end
 
-%Apply tmo operator
-function y:cube = tmo_p(x:cube,tmo_params)
-    y=(x.^tmo_params.a)./(((x.^tmo_params.a).^tmo_params.d).*tmo_params.b+tmo_params.c);
-    y=clamp(y,1.0)
-end
 
 %Kernel to Apply tmo operator in parallel
 function [y:cube] = tmo(x:cube,t:object)
@@ -95,10 +90,10 @@ function [] = main()
 
     tmo_params = object()
     % Derfault params
-    tmo_params.a= 1.3 % Contrast
-    tmo_params.d = 0.995  % Shoulder
-    tmo_params.midIn=0.18;
-    tmo_params.midOut=tmo_params.midIn;
+    tmo_params.a= 1.24 % Contrast
+    tmo_params.d = 0.90  % Shoulder
+    tmo_params.midIn=1.003;
+    tmo_params.midOut=0.18;
     tmo_params.hdrMax=64.0; %HDR Max value default (in image)
     updateBC(tmo_params);
      
@@ -109,23 +104,22 @@ function [] = main()
     
     % Color test
     img_file = "F:/Stuttgart/hdr_testimage/hdr_testimage_001033.exr";
-    
-    
+        
     img = exrread(img_file).data;
-    img=Alexa2sRGB(img) %Linear sRGB middle gray in 0.18
+    img=Alexa2sRGB(img,0) %Linear sRGB middle gray in 0.18
     
     %Remove bad data
-    img=(img>=tmo_params.midIn*2^EV_d_in).*img;
+    img=(img>=tmo_params.midIn*2^EV_d_in-1).*img;
     img=(img<=tmo_params.midIn*2^EV_b_in).*img;
 
     %Fix HDR Max from file
-    tmo_params.hdrMax = tmo_params.midIn*2^EV_b_in;
+    tmo_params.hdrMax = tmo_params.midIn*2^EV_b_in-1;
 
     %Sliders
-    slider_a =       frm.add_slider("Contrast(a):",tmo_params.a,0,10)
-    slider_d =       frm.add_slider("Shoulder(d):",tmo_params.d,0,10)
-    slider_midIn =   frm.add_slider("Mid In     :",tmo_params.midIn,0,2)
-    slider_midOut =  frm.add_slider("Mid Out    :",tmo_params.midOut,0,2)
+    slider_a =       frm.add_slider("Contrast(a):",tmo_params.a,0,10.0)
+    slider_d =       frm.add_slider("Shoulder(d):",tmo_params.d,0,10.0)
+    slider_midIn =   frm.add_slider("Mid In     :",tmo_params.midIn,0,2.0)
+    slider_midOut =  frm.add_slider("Mid Out    :",tmo_params.midOut,0,2.0)
     params_display = frm.add_display()
     
     
@@ -153,7 +147,7 @@ function [] = main()
     while !frm.closed()
        y=tmoRGBratio(x,tmo_params);
        img_tmo=tmoRGBratio(img,tmo_params);
-       fig=hdr_imshow(img_tmo,[0.18*2^-6,1]); 
+       fig=hdr_imshow(img_tmo,[0,1]); 
        f:qplot= params_display.plot(x,y);
        pause(0.01)
     end
