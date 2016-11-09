@@ -86,7 +86,19 @@ function y = PQ_encode(x)
 end
 
 %Applies the PQ codeword-to-light electro-to-optical transfer function PHILIPS version to input data from EXR
-function y =PQ_EOTF_PHILIPS(x)
+function y = PQ_EOTF_PHILIPS(x)
      y=(x>0).*(((25.^x-1)/(25-1)).^2.4)+(x<=0).*0;
 end
     
+function y = PQ_OETF_PHILIPS(x)    
+    b=0.0001812
+    a=1.00622
+    r=25
+    y=(x<b).*log(35.445*x*(r-1)+1)/log(r)+(x>=b).*log((a*x.^0.508-(a-1))*(r-1)+1)/log(r)
+end
+    
+function [] = main()
+    x=0..0.001..1
+    y=PQ_OETF_PHILIPS(x)
+    plot(x,y)
+end

@@ -31,7 +31,7 @@ function [] = testFStops(middle_gray)
     end
     
     %Black and white
-    im_test[8*hq..h,floor(w/2)..w]=middle_gray*2^EV_b;
+    %im_test[8*hq..h,floor(w/2)..w]=middle_gray*2^EV_b;
     
     repeat
         hdr_imshow(im_test,[middle_gray*2^-EV_b,middle_gray*2^EV_b]) % to put de middle gray in the center of screen brigthess

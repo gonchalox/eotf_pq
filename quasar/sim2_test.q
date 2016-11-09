@@ -27,31 +27,32 @@ function [] = main()
     max_val = 1; %6000 nits
     width=1920;
     height=1080;
-    steps = 1;
+    steps = 500;
     delta_nits=max_val/(steps-1)
     delta=width/steps
     im_gs = zeros(height,width);
-    gamma=2.2;
+    gamma=3.48;
  
     current_nits=0.0;
-    %Create gray gradient pattern
-    for i=0..steps-1
-        im_gs[:,floor(i*delta)..floor((i+1)*delta)-1]=current_nits;
-        current_nits+=delta_nits;
-    end
-    %LDR
-    imshow(im_gs*max_val,[0,max_val]); %LDR display decode to a linear space
-    %HDR
-    %HDR display needs a linearized space
-    hdr_imshow((im_gs.^2.61)*max_val, [0,max_val])
+%    %Create gray gradient pattern
+%    for i=0..steps-1
+%        im_gs[:,floor(i*delta)..floor((i+1)*delta)-1]=current_nits;
+%        current_nits+=delta_nits;
+%    end
+%    %LDR
+%    imshow(im_gs*max_val,[0,max_val]); %LDR display decode to a linear space
+%    %HDR
+%    %HDR display needs a linearized space
+%    hdr_imshow((im_gs.^2.61)*max_val, [0,max_val])
                         
     %Read image files
     %try: big_3_gray_scale_1.jpg  sunrise_flanker_by_billym12345-d8q0gc5.png
-    %im_file=imread("../big_3_gray_scale_1.jpg")./255;
+    im_file=float(imread("../gray_scale.png"));
+    im_file=im_file./max(im_file)
     %LDR
-    %imshow(im_file*max_val,[0,1]); %LDR display decode to a linear space
+    %imshow((im_file)*max_val,[0,max_val]); %LDR display decode to a linear space
     %HDR display needs a linearized space
-    %hdr_imshow(im_file,[0,1]);    
+    hdr_imshow((im_file.^gamma)*max_val,[0,1]);    
     
     
 end
