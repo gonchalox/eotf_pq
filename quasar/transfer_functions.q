@@ -16,6 +16,65 @@ function img_rgb = Alexa2sRGB(img_alexa)
    img_rgb = reshape(reshape(img_alexa,[1080*1920,3])*H,[1080,1920,3]);
 end
 
+%P3
+function y = csdecodeP3(x) 
+    p3xyx = [[0.4451698,  0.2094917,  0.0000000],
+            [0.2771344,  0.7215953,  0.0470606],
+            [0.1722827,  0.0689131,  0.9073554]] 
+    y = reshape(reshape(x,[1080*1920,3])*p3xyx,[1080,1920,3]);
+end
+
+function y = csencodeP3(x) 
+    xyzp3=[[2.7253940,  -0.7951680, 0.0412419],
+           [-1.0180030, 1.6897321,  -0.0876390],
+           [-0.4401632, 0.0226472,  1.1009294]]
+    y = xyzp3*x
+end
+
+%SRGB    
+function y = csdecodeSRGB(x) 
+    srgbxyz = [[0.4124564, 0.2126729, 0.0193339],
+               [0.3575761, 0.7151522, 0.1191920],
+               [0.1804375, 0.0721750, 0.9503041]]
+    y = srgbxyz * x;
+end
+
+function y = csencodeSRGB(x) 
+    xyzsrgb = [[3.2404542, -0.9692660, 0.0556434],
+               [-1.5371385, 1.8760108, -0.2040259],
+               [-0.4985314, 0.0415560, 1.0572252]]
+    y = reshape(reshape(x,[1080*1920,3])*xyzsrgb,[1080,1920,3]);
+end
+
+%Rec2020
+function y = csdecodeRec2020(x) 
+    rec2020xyz = [[0.6369580, 0.2627002, 0.0000000],
+                  [0.1446169, 0.6779981, 0.0280727],
+                  [0.1688810, 0.0593017, 1.0609851]]
+    y = reshape(reshape(x,[1080*1920,3])*rec2020xyz,[1080,1920,3]);
+end
+
+function y = csencodeRec2020(x) 
+    xyzrec2020 = [[1.7166512, -0.6666844, 0.0176399],
+                  [-0.3556708, 1.6164812, 0.0157685],
+                  [0.0176399, -0.0427706, 0.9421031]]
+    y = reshape(reshape(x,[1080*1920,3])*xyzrec2020,[1080,1920,3]);
+end
+
+%Rec709
+function y = csdecodeRec709(x) 
+    srgbxyz = [[0.4124564, 0.2126729, 0.0193339],
+               [0.3575761, 0.7151522, 0.1191920],
+               [0.1804375, 0.0721750, 0.9503041]]
+    y = reshape(reshape(x,[1080*1920,3])*srgbxyz,[1080,1920,3]);
+end
+
+function y = csencodeRec709(x) 
+    xyzsrgb = [[3.2404542, -0.9692660, 0.0556434],
+               [-1.5371385, 1.8760108, -0.2040259],
+               [-0.4985314, 0.0415560, 1.0572252]]
+    y = reshape(reshape(x,[1080*1920,3])*xyzsrgb,[1080,1920,3]);
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Transfer functions                          %
@@ -81,7 +140,7 @@ pqL=1.0
 
 % Linearize
 % PQ 2 Linear
-function y = PQ_encode(x)
+function y = PQ_EOTF(x)
    y = ((x.^(1./m2)-c1)./(c2-c3*x.^(1/m2))).^(1/m1)
 end
 
@@ -102,3 +161,6 @@ function [] = main()
     y=PQ_OETF_PHILIPS(x)
     plot(x,y)
 end
+
+%LMS
+     
