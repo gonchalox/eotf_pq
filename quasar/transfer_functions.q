@@ -156,11 +156,11 @@ function y = PQ_OETF_PHILIPS(x)
     y=(x<b).*log(35.445*x*(r-1)+1)/log(r)+(x>=b).*log((a*x.^0.508-(a-1))*(r-1)+1)/log(r)
 end
     
-function [] = main()
-    x=0..0.001..1
-    y=PQ_OETF_PHILIPS(x)
-    plot(x,y)
-end
+%function [] = main()
+%    x=0..0.001..1
+%    y=PQ_OETF_PHILIPS(x)
+%    plot(x,y)
+%end
 
 %LMS
      

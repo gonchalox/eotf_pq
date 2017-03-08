@@ -47,7 +47,7 @@ repeat
     
     
     %img=(img<0).*(0.18*2^minEV)+(img>=0).*img;
-    img=fix_negative(img,0.18*2^minEV);
+    %img=fix_negative(img,0.18*2^minEV);
     
     fig=hdr_imshow(img,[0.18*2^minEV,0.18*2^maxEV])
     fig.onSelectPoint.add(mouse_handler)
