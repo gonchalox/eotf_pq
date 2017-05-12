@@ -104,17 +104,12 @@ function [] = main()
     
     % Color test
     %img_file = "F:/Stuttgart/hdr_testimage/hdr_testimage_001033.exr";
-    img_file = "C:\Users\ipi\Desktop\gunther_verify\000113.exr";
+    img_file = "C:\Users\ipi\Desktop\gunther_verify\001116.exr";
         
     img = exrread(img_file).data;
-    img=Alexa2sRGB(img,0) %Linear sRGB middle gray in 0.18
     
-    %Remove bad data
-    img=(img>=tmo_params.midIn*2^EV_d_in-1).*img;
-    img=(img<=tmo_params.midIn*2^EV_b_in).*img;
-
     %Fix HDR Max from file
-    tmo_params.hdrMax = tmo_params.midIn*2^EV_b_in-1;
+    tmo_params.hdrMax = 1.0;
 
     %Sliders
     slider_a =       frm.add_slider("Contrast(a):",tmo_params.a,0,10.0)
@@ -139,7 +134,7 @@ function [] = main()
                                 updateBC(tmo_params)));      
 
     % To check the curve                            
-    x = 0.1..1..0.18*2^12; %0 and maximun value of Stuttgart files 12stops
+    x = 0..0.1..1; %0 and maximun value of Stuttgart files 12stops
     y=zeros(size(x));
     hold("on")  
     img_tmo:cube=zeros(size(img))

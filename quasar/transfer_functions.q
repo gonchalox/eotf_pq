@@ -47,6 +47,17 @@ function y = csencodeSRGB(x)
 end
 
 %Rec2020
+function y = Rec2020TosRGB(x)
+    Rec2020_2_sRGB = [[1.660491002108435, -0.124550474521591, -0.018150763354905],
+                      [-0.587641138788550,  1.132899897125960, -0.100578898008007],
+                      [-0.072849863319885, -0.008349422604369,  1.118729661362913]]
+
+    [h,w,c] = size(x)
+    assert(c==3)
+    y = reshape(reshape(x,[h*w,c])*Rec2020_2_sRGB,[h,w,c]);
+    
+end
+
 function y = csdecodeRec2020(x) 
     rec2020xyz = [[0.6369580, 0.2627002, 0.0000000],
                   [0.1446169, 0.6779981, 0.0280727],
@@ -138,29 +149,22 @@ oneoverm1= 1/m1;
 oneoverm2= 1/m2;
 pqL=1.0
 
+
 % Linearize
+%Decoding PQ
 % PQ 2 Linear
 function y = PQ_EOTF(x)
    y = ((x.^(1./m2)-c1)./(c2-c3*x.^(1/m2))).^(1/m1)
 end
 
-%Applies the PQ codeword-to-light electro-to-optical transfer function PHILIPS version to input data from EXR
-function y = PQ_EOTF_PHILIPS(x)
-     y=(x>0).*(((25.^x-1)/(25-1)).^2.4)+(x<=0).*0;
+%Coding 
+function y = PQ_OETF(x)
+   t = x.^m1
+   y = ((c2 *t + c1)./(1.0 + c3 *t)).^m2;
 end
-    
-function y = PQ_OETF_PHILIPS(x)    
-    b=0.0001812
-    a=1.00622
-    r=25
-    y=(x<b).*log(35.445*x*(r-1)+1)/log(r)+(x>=b).*log((a*x.^0.508-(a-1))*(r-1)+1)/log(r)
-end
-    
-%function [] = main()
-%    x=0..0.001..1
-%    y=PQ_OETF_PHILIPS(x)
-%    plot(x,y)
-%end
 
-%LMS
-     
+function [] = main()
+    x=0..0.00001..1
+    plot(x,PQ_EOTF(x),"r", x,x.^9,"g")
+end
+
