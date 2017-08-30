@@ -5,6 +5,7 @@ import "Quasar.Runtime.dll"
 import "Sim2HDR.dll"
 import "exr_lib.dll"
 import "Quasar.UI.dll"
+import "C:\Users\ipi\Documents\gluzardo\eotf_pq\quasar\transfer_functions.q"
 
 img:cube 
 
@@ -38,19 +39,23 @@ end
 minEV=-4;
 maxEV=6;    
     
-i=158
+i=494
 repeat
-    i=i+1
-    exr_file_path = sprintf("F:/tearsofsteel/01_2a/out/itm_01_2a_000%03d.exr",i); %158
+    
+    exr_file_path = sprintf("H:/temp/HDR_KORTFILM_PQ1K_2020_000%d.exr",i); %158
     %exr_file_path="C:/Users/ipi/Documents/gluzardo/eotf_pq/linear_tears_of_steal.exr"
     img = exrread(exr_file_path).data;
+    img = Rec2020TosRGB(img)
+    img = PQ_EOTF(img)
     
     
     %img=(img<0).*(0.18*2^minEV)+(img>=0).*img;
     %img=fix_negative(img,0.18*2^minEV);
     
-    fig=hdr_imshow(img,[0.18*2^minEV,0.18*2^maxEV])
-    fig.onSelectPoint.add(mouse_handler)
+    %fig=hdr_imshow(img,[0.18*2^minEV,0.18*2^maxEV])
+    hdr_imshow(img*6,[0,1])
+    %fig.onSelectPoint.add(mouse_handler)
+    i=i+1
 until !hold("on")
 
 

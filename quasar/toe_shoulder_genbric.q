@@ -92,9 +92,9 @@ function [] = main()
     % Derfault params
     tmo_params.a= 1.24 % Contrast
     tmo_params.d = 0.90  % Shoulder
-    tmo_params.midIn=1.003;
-    tmo_params.midOut=0.18;
-    tmo_params.hdrMax=64.0; %HDR Max value default (in image)
+    tmo_params.midIn=0.5;
+    tmo_params.midOut=0.148;
+    tmo_params.hdrMax=1.0; %HDR Max value default (in image)
     updateBC(tmo_params);
      
     % Sttutgart files
@@ -103,18 +103,20 @@ function [] = main()
     EV_b_in=12;
     
     % Color test
-    img_file = "H:\temp\SDR Plus kortfilm1080743.exr";
+    img_file = "H:\temp\frame_2.exr";
     %img_file = "C:\Users\ipi\Desktop\gunther_verify\000113.exr";
         
     img = exrread(img_file).data;
-    img=Alexa2sRGB(img,0) %Linear sRGB middle gray in 0.18
+    %img = img/(2^16-1)
+    img = img.^2.2
+    %img=Alexa2sRGB(img,0) %Linear sRGB middle gray in 0.18
     
     %Remove bad data
-    img=(img>=tmo_params.midIn*2^EV_d_in-1).*img;
-    img=(img<=tmo_params.midIn*2^EV_b_in).*img;
+    %img=(img>=tmo_params.midIn*2^EV_d_in-1).*img;
+    %img=(img<=tmo_params.midIn*2^EV_b_in).*img;
 
     %Fix HDR Max from file
-    tmo_params.hdrMax = tmo_params.midIn*2^EV_b_in-1;
+    tmo_params.hdrMax = 1.0% tmo_params.midIn*2^EV_b_in-1;
 
     %Sliders
     slider_a =       frm.add_slider("Contrast(a):",tmo_params.a,0,10.0)
@@ -139,7 +141,7 @@ function [] = main()
                                 updateBC(tmo_params)));      
 
     % To check the curve                            
-    x = 0.1..1..0.18*2^12; %0 and maximun value of Stuttgart files 12stops
+    x = 0..1/2^10..1; %0 and maximun value of Stuttgart files 12stops
     y=zeros(size(x));
     hold("on")  
     img_tmo:cube=zeros(size(img))
