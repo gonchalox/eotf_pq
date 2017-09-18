@@ -1,3 +1,6 @@
+import "Quasar.Video.dll"
+import "inttypes.q"
+
 %%%%%%%%%%%%%%%%%%%%%5%%%%%%%%%%%%%%%%%%%%%%%%
 % Alexa to sRGB                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -157,14 +160,53 @@ function y = PQ_EOTF(x)
    y = ((x.^(1./m2)-c1)./(c2-c3*x.^(1/m2))).^(1/m1)
 end
 
+function y = PQK_EOTF(x,k)
+   y = k*((x.^(1./m2)-c1)./(c2-c3*x.^(1/m2))).^(1/m1)
+end
+
 %Coding 
 function y = PQ_OETF(x)
    t = x.^m1
    y = ((c2 *t + c1)./(1.0 + c3 *t)).^m2;
 end
 
-function [] = main()
-    x=0..0.00001..1
-    plot(x,PQ_EOTF(x),"r", x,x.^9,"g")
+
+%HLG PG
+%Encode to HLG (Delinearize)
+%x between 0 and 1
+function y = PQ_OETF_HLG(x)    
+    f=12
+    E=x*12 %ARIB STD-B67 has a nominal range of 0 to 12.
+    r=0.5
+    a = 0.17883277
+    b = 0.28466892
+    c = 0.55991073
+    y= (E<=1).*(r*sqrt(E)) + (E>1).*(a*log(E-b)+c)
 end
+     
+
+
+%Decode HLG (Linearize)
+%x between 0 and 1
+function y = PQ_EOTF_HLG(x)    
+    r=0.5
+    a = 0.17883277
+    b = 0.28466892
+    c = 0.55991073
+    
+    y = ((x/r).^2).*(x<r)  +  (exp(x/2)+b).*(x>r)
+    
+end
+
+
+%function [] = main()
+%    video = "H:/HDR_KORTFILM_PQ1K_2020_.mov"
+%    stream = vidopen(video) 
+%    vidseek(stream,5)
+%    
+%    frame = float(stream.rgb_data)       
+%    imshow(frame)
+%    
+%    
+%end
 
