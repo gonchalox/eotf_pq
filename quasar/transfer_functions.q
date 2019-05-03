@@ -82,6 +82,13 @@ function y = sRGBToXYZ(x,w,h)
     y = reshape(reshape(x,[h*w,3])*srgb2xyz,[h,w,3]);
 end
 
+function y = rec709Torec2020(x,w,h)
+    trans=transpose([[ 0.6274, 0.3293, 0.0433],
+             [ 0.0691, 0.9195, 0.0114],
+             [ 0.0164, 0.0880, 0.8956]])
+             y = reshape(reshape(x,[h*w,3])*trans,[h,w,3]);
+end
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Transfer functions                          %
@@ -144,17 +151,6 @@ function x = logcdecode(z)
     x = (z > g).*((10.0.^(((z - d) / c) - b)) / a) + (z <= g).*((z - f) / e);
 end
 
-%%%%%%%%%%% PQ Transfer functions %%%%%%%%%%%%
-m1=2610/4096*1/4
-m2=2523/4096*128
-c1=3424/4096
-c2=2413/4096*32
-c3=2392/4096*32
-oneoverm1= 1/m1;
-oneoverm2= 1/m2;
-pqL=1.0
-
-
 %Decode HLG (Linearize)
 %x between 0 and 1
 function y = PQ_EOTF_BT2100(x)    
@@ -170,11 +166,20 @@ function y = PQ_EOTF_BT2100(x)
     y = (ma./d).^(1/m1) 
 end
 
-% Linearize
+% %%%%%%%%%%% PQ Transfer functions %%%%%%%%%%%%
+m1=(2610/4096)*1/4
+m2=(2523/4096)*128
+c1=3424/4096
+c2=(2413/4096)*32
+c3=(2392/4096)*32
+oneoverm1= 1/m1;
+oneoverm2= 1/m2;
+pqL=1.0
+
 %Decoding PQ
 % PQ 2 Linear
 function y = PQ_EOTF(x)
-   y = ((x.^(1./m2)-c1)./(c2-c3*x.^(1/m2))).^(1/m1)
+   y = ((x.^(1./m2)-c1)./(c2-c3*x.^(oneoverm2))).^(oneoverm1)
 end
 
 function y = PQK_EOTF(x,k)
